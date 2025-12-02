@@ -1,0 +1,74 @@
+﻿<Window x:Class="ModeLauncher.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Settings"
+        Width="600"
+        Height="450"
+        WindowStartupLocation="CenterScreen"
+        Background="#1E1F24">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Text="Settings"
+                   FontSize="24"
+                   Foreground="White"
+                   Margin="0,0,0,16"/>
+
+        <!-- Modes List -->
+        <ListBox Grid.Row="1"
+                 ItemsSource="{Binding Modes}"
+                 SelectedItem="{Binding SelectedMode}"
+                 Background="#242529">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Margin="0,4">
+                        <TextBox Text="{Binding Label}"
+                                 Margin="0,2"
+                                 Width="200"/>
+
+                        <TextBox Text="{Binding Subtitle}"
+                                 Margin="0,2"
+                                 Width="200"/>
+
+                        <TextBox Text="{Binding ExecutablePath}"
+                                 Margin="0,2"
+                                 Width="300"/>
+
+                        <TextBox Text="{Binding Arguments}"
+                                 Margin="0,2"
+                                 Width="200"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,12,0,0">
+
+            <Button Content="Add"
+                    Width="80"
+                    Command="{Binding AddModeCommand}"/>
+
+            <Button Content="Remove"
+                    Width="80"
+                    Command="{Binding RemoveModeCommand}"/>
+
+            <Button Content="Save"
+                    Width="80"
+                    Command="{Binding SaveCommand}"/>
+
+            <Button Content="Close"
+                    Width="80"
+                    Command="{Binding CloseCommand}"/>
+        </StackPanel>
+
+    </Grid>
+</Window>
