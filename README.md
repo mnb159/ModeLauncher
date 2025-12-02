@@ -1,50 +1,108 @@
-📦 ModeLauncher
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ModeLauncher</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 2rem;
+      background-color: #0f172a;
+      color: #e5e7eb;
+    }
+    a { color: #60a5fa; }
+    h1, h2, h3 {
+      color: #f9fafb;
+      margin-top: 1.5rem;
+    }
+    code {
+      background: #020617;
+      padding: 0.15rem 0.35rem;
+      border-radius: 4px;
+      font-size: 0.9em;
+    }
+    pre {
+      background: #020617;
+      padding: 1rem;
+      border-radius: 8px;
+      overflow-x: auto;
+      font-size: 0.9em;
+    }
+    pre code {
+      background: transparent;
+      padding: 0;
+    }
+    .tagline {
+      font-size: 0.98rem;
+      color: #9ca3af;
+      margin-bottom: 1.5rem;
+    }
+    ul {
+      padding-left: 1.2rem;
+    }
+    li {
+      margin: 0.2rem 0;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      max-width: 600px;
+      margin-top: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    th, td {
+      border: 1px solid #1f2933;
+      padding: 0.4rem 0.6rem;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+    th {
+      background-color: #111827;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+  </style>
+</head>
+<body>
 
-A full-screen WPF launcher designed for gaming PCs, home theater setups, and living-room systems.
-It provides a simple “Choose Mode” startup screen that automatically launches a selected application (Steam, Jellyfin, Windows Desktop, Chrome, etc.) after a countdown — with keyboard and mouse support and a built-in settings editor.
+  <h1>ModeLauncher</h1>
+  <p class="tagline">
+    A full-screen WPF launcher for gaming PCs, HTPCs, and couch setups. Choose a mode
+    (Gaming, Streaming, Windows, etc.) on boot and auto-launch it after a countdown.
+  </p>
 
-Perfect for couch PCs and HTPC builds.
+  <h2>Features</h2>
+  <ul>
+    <li>Full-screen, minimal launcher UI</li>
+    <li>Configurable modes (Gaming, Streaming, Windows, Chrome, etc.)</li>
+    <li>Auto-launch after a configurable countdown</li>
+    <li>Keyboard navigation:
+      <ul>
+        <li><span class="mono">←</span> / <span class="mono">→</span> to switch modes</li>
+        <li><span class="mono">Enter</span> to launch</li>
+        <li><span class="mono">Ctrl + S</span> opens Settings</li>
+        <li><span class="mono">ESC</span> exits launcher</li>
+      </ul>
+    </li>
+    <li>Mouse support – click tiles to select mode</li>
+    <li>Built-in settings window:
+      <ul>
+        <li>Add / remove launch modes</li>
+        <li>Edit labels, subtitles, executable paths, and arguments</li>
+        <li>Set default mode</li>
+        <li>Adjust countdown duration</li>
+      </ul>
+    </li>
+    <li>Icon loading via Windows shell (no System.Drawing dependency)</li>
+    <li>Portable, self-contained publish supported</li>
+  </ul>
 
-🎯 Features
-
-Full-screen, minimal launcher UI
-
-Configurable modes (Gaming, Streaming, Windows, Chrome, etc.)
-
-Auto-launch after countdown
-
-Keyboard navigation
-
-← / → to switch mode
-
-Enter to launch
-
-Ctrl+S opens Settings
-
-ESC exits launcher
-
-Mouse support — click tiles to select
-
-Built-in settings window
-
-Add / remove launch modes
-
-Change executable paths
-
-Edit labels / arguments
-
-Choose default mode
-
-Change countdown duration
-
-Auto-refresh icons using Windows shell extraction
-
-No System.Drawing dependency (works in publish builds)
-
-Portable — self-contained single-file publish supported
-
-📁 Folder Structure
-ModeLauncher
+  <h2>Folder Structure</h2>
+  <pre><code>ModeLauncher
  ├─ Converters/
  │   └─ BoolToHighlightConverter.cs
  ├─ Helpers/
@@ -62,18 +120,15 @@ ModeLauncher
  ├─ LauncherWindow.xaml.cs
  ├─ SettingsWindow.xaml
  ├─ SettingsWindow.xaml.cs
- └─ ModeLauncher.csproj
+ └─ ModeLauncher.csproj</code></pre>
 
-⚙️ Configuration File
+  <h2>Configuration</h2>
 
-The launcher stores its config here:
+  <p>Configuration is stored in:</p>
+  <pre><code>%LOCALAPPDATA%\ModeLauncher\config.json</code></pre>
 
-%LOCALAPPDATA%\ModeLauncher\config.json
-
-
-Example:
-
-{
+  <p>Example configuration:</p>
+  <pre><code>{
   "DefaultModeId": "gaming",
   "CountdownSeconds": 5,
   "Modes": [
@@ -97,103 +152,123 @@ Example:
       "ExecutablePath": "explorer.exe"
     }
   ]
-}
+}</code></pre>
 
+  <p>The settings window edits this file automatically.</p>
 
-The settings window rewrites this file automatically.
+  <h2>Keyboard &amp; Mouse Controls</h2>
 
-⌨️ Keyboard Controls
-Key	Action
-Left / Right	Select mode
-Enter	Launch selected mode
-Ctrl + S	Open Settings
-ESC	Exit launcher
-Mouse Click	Select mode
-🚀 How to Build
-Requirements
+  <table>
+    <thead>
+      <tr>
+        <th>Key / Input</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="mono">Left / Right</span></td>
+        <td>Select previous / next mode</td>
+      </tr>
+      <tr>
+        <td><span class="mono">Enter</span></td>
+        <td>Launch selected mode</td>
+      </tr>
+      <tr>
+        <td><span class="mono">Ctrl + S</span></td>
+        <td>Open Settings window</td>
+      </tr>
+      <tr>
+        <td><span class="mono">ESC</span></td>
+        <td>Exit launcher</td>
+      </tr>
+      <tr>
+        <td><span class="mono">Mouse Click</span></td>
+        <td>Select mode tile</td>
+      </tr>
+    </tbody>
+  </table>
 
-Visual Studio 2022/2026
+  <h2>Build</h2>
 
-.NET 10 SDK (with WPF support)
+  <h3>Requirements</h3>
+  <ul>
+    <li>Visual Studio 2022 or later</li>
+    <li>.NET 10 SDK (with WPF workload)</li>
+  </ul>
 
-Build
-dotnet build
+  <h3>Build (Debug / Release)</h3>
+  <pre><code>dotnet build</code></pre>
 
-Publish (self-contained EXE)
+  <h3>Publish (self-contained EXE)</h3>
 
-Run from project folder, not solution folder:
+  <p>Run from the <strong>project</strong> directory (where <code>ModeLauncher.csproj</code> lives):</p>
 
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish
+  <pre><code>dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o publish</code></pre>
 
+  <p>The output will be in:</p>
+  <pre><code>ModeLauncher\publish\</code></pre>
 
-Result will appear in:
+  <p>and will contain <code>ModeLauncher.exe</code> plus required runtime files.</p>
 
-ModeLauncher/publish/
+  <h2>Run at Startup</h2>
 
-🖥️ Set ModeLauncher to Run at Startup
-Option 1 — Startup Folder (recommended)
+  <h3>Option 1 – Startup Folder</h3>
+  <ol>
+    <li>Press <span class="mono">Win + R</span></li>
+    <li>Type <span class="mono">shell:startup</span> and press Enter</li>
+    <li>Copy a shortcut to <code>ModeLauncher.exe</code> into that folder</li>
+  </ol>
 
-Create a shortcut:
+  <h3>Option 2 – Task Scheduler</h3>
+  <ol>
+    <li>Open <strong>Task Scheduler</strong></li>
+    <li>Create a basic task</li>
+    <li>Trigger: At log on</li>
+    <li>Action: Start a program → <code>ModeLauncher.exe</code></li>
+    <li>(Optional) Enable “Run with highest privileges”</li>
+  </ol>
 
-shell:startup
+  <h2>Supported Apps (Examples)</h2>
 
+  <ul>
+    <li>Steam (<span class="mono">steam.exe</span>)</li>
+    <li>Google Chrome (<span class="mono">chrome.exe</span>)</li>
+    <li>GOG Galaxy</li>
+    <li>Epic Games Launcher</li>
+    <li>Jellyfin Media Player</li>
+    <li>VLC / MPC-HC / other players</li>
+    <li>RetroArch / emulators</li>
+    <li><span class="mono">explorer.exe</span> (Windows Desktop)</li>
+  </ul>
 
-Place ModeLauncher.exe there.
+  <p>Any executable can be used as a mode.</p>
 
-Option 2 — Task Scheduler (for admin/system setups)
+  <h2>Troubleshooting</h2>
 
-Triggers → At logon
-Action → Start Program → ModeLauncher.exe
-Run with highest privileges → ON
+  <h3>Chrome icon not showing</h3>
+  <p>Chrome is often installed per-user. Use one of these paths:</p>
 
-🧪 Known Supported Apps
+  <pre><code>%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe</code></pre>
 
-Steam (steam.exe)
+  <h3>Publish folder is empty</h3>
+  <ul>
+    <li>Make sure you run <code>dotnet publish</code> from the project directory, not the solution directory.</li>
+    <li>Check that <code>ModeLauncher.csproj</code> uses <code>Sdk="Microsoft.NET.Sdk.WindowsDesktop"</code> and <code>&lt;UseWPF&gt;true&lt;/UseWPF&gt;</code>.</li>
+  </ul>
 
-Chrome (chrome.exe)
+  <h3>Settings window layout looks off</h3>
+  <p>WPF control defaults vary slightly by theme/OS. You can adjust margins and padding in the XAML for <code>SettingsWindow.xaml</code> if needed.</p>
 
-GOG Galaxy
+  <h2>Future Ideas</h2>
 
-Epic Games Launcher
+  <ul>
+    <li>Gamepad navigation support</li>
+    <li>Animated transitions and hover effects</li>
+    <li>Custom themes and backgrounds per mode</li>
+    <li>Automatic detection of installed launchers</li>
+    <li>Per-mode startup scripts (e.g., change resolution, audio device)</li>
+  </ul>
 
-Jellyfin Media Player
-
-MPC-HC / VLC
-
-RetroArch
-
-Explorer.exe (Windows Desktop)
-
-Anything executable works.
-
-🛠️ Troubleshooting
-❗ Chrome icon not showing
-
-Chrome is often installed per-user.
-
-Use:
-
-%LOCALAPPDATA%\Google\Chrome\Application\chrome.exe
-
-❗ Publish output folder empty
-
-Ensure publish is run inside project directory, not solution folder.
-
-❗ Settings window buttons misaligned
-
-Your version of WPF may apply different default padding.
-You may restyle the controls via Styles.xaml.
-
-💡 Future Enhancements (optional ideas)
-
-Gamepad navigation
-
-Animated transitions for tiles
-
-Theme packs
-
-Steam artwork auto-loading
-
-Custom backgrounds per mode
-
-Auto-detect installed apps
+</body>
+</html>
