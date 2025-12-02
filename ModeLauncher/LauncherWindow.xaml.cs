@@ -1,230 +1,230 @@
 ﻿using ModeLauncher.Models;
 using ModeLauncher.Services;
 using ModeLauncher.ViewModels;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 
 namespace ModeLauncher
 {
-    public partial class LauncherWindow : Window
+    public partial class LauncherWindow : Window, System.ComponentModel.INotifyPropertyChanged
     {
-        public ObservableCollection<ModeItem> Modes { get; set; } = new();
-        public string CountdownText => _timeLeft > 0
-            ? $"Launching default mode in {_timeLeft} seconds..."
-            : "Selection active";
+        public static bool ReloadIconsRequested = false;
 
-        private int _timeLeft;
-        private DispatcherTimer? _timer;
-        private LauncherConfig? _config;
-        private ModeItem? _selectedMode;
+        private readonly ConfigService _configService = new ConfigService();
+        private readonly IconService _iconService = new IconService();
+
+        private LauncherConfig _config;
+
+        public List<ModeItem> Modes { get; private set; } = new();
+
+        public ModeItem SelectedMode => Modes.First(m => m.IsSelected);
+
+        private DispatcherTimer _timer;
+        private int _countdown;
+
+        public string CountdownText =>
+            _countdown > 0
+            ? $"Launching {SelectedMode.Label} in {_countdown}..."
+            : "";
 
         public LauncherWindow()
         {
             InitializeComponent();
+
             LoadConfig();
-            SetupUI();
+            LoadModes();
+            SetupCountdown();
+
+            DataContext = this;
+            Root.Focus();
         }
 
-        // -------------------------
-        // CONFIG & MODE LOADING
-        // -------------------------
         private void LoadConfig()
         {
-            var service = new ConfigService();
-            _config = service.Load();
-
-            _timeLeft = _config.CountdownSeconds;
-
-            Modes.Clear();
-
-            foreach (var mode in _config.Modes)
-            {
-                var item = new ModeItem
-                {
-                    Id = mode.Id,
-                    Label = mode.Label,
-                    Subtitle = mode.Subtitle,
-                    ExecutablePath = mode.ExecutablePath,
-                    Arguments = mode.Arguments
-                };
-
-                // extract icon from the executable
-                item.Icon = IconService.FromExe(item.ExecutablePath);
-
-                Modes.Add(item);
-            }
-
-            _selectedMode = Modes.FirstOrDefault(m => m.Id == _config.DefaultModeId)
-                             ?? Modes.FirstOrDefault();
-
-            if (_selectedMode != null)
-                _selectedMode.IsSelected = true;
+            _config = _configService.Load();
         }
 
-
-        // -------------------------
-        // UI SETUP & COUNTDOWN
-        // -------------------------
-        private void SetupUI()
+        public void LoadModes()
         {
-            DataContext = this;
+            Modes = new List<ModeItem>();
 
-            _timer = new DispatcherTimer
+            foreach (var m in _config.Modes)
             {
-                Interval = TimeSpan.FromSeconds(1)
-            };
+                Modes.Add(new ModeItem
+                {
+                    Id = m.Id,
+                    Label = m.Label,
+                    Subtitle = m.Subtitle,
+                    ExecutablePath = m.ExecutablePath,
+                    Arguments = m.Arguments,
+                    Icon = _iconService.GetIcon(m.ExecutablePath),
+                    IsSelected = false
+                });
+            }
 
+            var defaultMode = Modes.FirstOrDefault(m => m.Id == _config.DefaultModeId)
+                              ?? Modes.First();
+
+            defaultMode.IsSelected = true;
+
+            OnPropertyChanged(nameof(Modes));
+            OnPropertyChanged(nameof(SelectedMode));
+            OnPropertyChanged(nameof(CountdownText));
+        }
+
+        private void SetupCountdown()
+        {
+            _countdown = _config.CountdownSeconds;
+
+            _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             _timer.Tick += (s, e) =>
             {
-                _timeLeft--;
-
-                if (_timeLeft <= 0)
+                if (_countdown <= 0)
                 {
                     _timer.Stop();
-                    LaunchSelected();
-                    return;
+                    LaunchSelectedMode();
                 }
-
-                OnPropertyChanged(nameof(CountdownText));
+                else
+                {
+                    _countdown--;
+                    OnPropertyChanged(nameof(CountdownText));
+                }
             };
 
             _timer.Start();
+            OnPropertyChanged(nameof(CountdownText));
+        }
+
+        private void LaunchSelectedMode()
+        {
+            try
+            {
+                var m = SelectedMode;
+
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = m.ExecutablePath,
+                    Arguments = m.Arguments ?? "",
+                    UseShellExecute = true
+                });
+
+                Application.Current.Shutdown();
+            }
+            catch
+            {
+                MessageBox.Show("Unable to start the selected mode.");
+            }
+        }
+
+        private void MoveSelection(int direction)
+        {
+            var index = Modes.IndexOf(SelectedMode);
+            int newIndex = index + direction;
+
+            if (newIndex < 0 || newIndex >= Modes.Count)
+                return;
+
+            Modes[index].IsSelected = false;
+            Modes[newIndex].IsSelected = true;
+
+            OnPropertyChanged(nameof(Modes));
+            OnPropertyChanged(nameof(SelectedMode));
+            OnPropertyChanged(nameof(CountdownText));
         }
 
         private void CancelCountdown()
         {
             _timer?.Stop();
-            _timeLeft = 0;
+            _countdown = 0;
             OnPropertyChanged(nameof(CountdownText));
         }
 
-        // -------------------------
-        // GRID LOADED = SET FOCUS
-        // -------------------------
-        private void Root_Loaded(object sender, RoutedEventArgs e)
-        {
-            Root.Focus();
-        }
-
-        // -------------------------
-        // KEYBOARD NAVIGATION
-        // -------------------------
         private void Root_KeyDown(object sender, KeyEventArgs e)
         {
             CancelCountdown();
 
             if (e.Key == Key.Escape)
             {
-                Close();
-                return;
-            }
-
-            if (e.Key == Key.S && Keyboard.Modifiers == ModifierKeys.Control)
-            {
-                OpenSettings();
+                Application.Current.Shutdown();
                 return;
             }
 
             if (e.Key == Key.Left)
-                Move(-1);
+                MoveSelection(-1);
 
             if (e.Key == Key.Right)
-                Move(1);
+                MoveSelection(1);
 
             if (e.Key == Key.Enter)
-            {
-                LaunchSelected();
-            }
+                LaunchSelectedMode();
+
+            if (e.Key == Key.S && Keyboard.Modifiers == ModifierKeys.Control)
+                OpenSettings();
         }
 
-        // -------------------------
-        // MOUSE CANCELS COUNTDOWN
-        // -------------------------
         private void Root_MouseDown(object sender, MouseButtonEventArgs e)
         {
             CancelCountdown();
         }
 
-        // -------------------------
-        // MODE SELECTION MOVEMENT
-        // -------------------------
-        private void Move(int delta)
+        private void Root_Loaded(object sender, RoutedEventArgs e)
         {
-            if (Modes.Count == 0) return;
-
-            int currentIndex = _selectedMode != null ? Modes.IndexOf(_selectedMode) : 0;
-            int newIndex = (currentIndex + delta + Modes.Count) % Modes.Count;
-
-            if (_selectedMode != null)
-                _selectedMode.IsSelected = false;
-
-            _selectedMode = Modes[newIndex];
-            _selectedMode.IsSelected = true;
+            Root.Focus();
         }
 
-        // -------------------------
-        // MODE LAUNCHING
-        // -------------------------
-        private void LaunchSelected()
+        private void ModeTile_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (_selectedMode == null) return;
+            CancelCountdown();
 
-            try
+            if (sender is FrameworkElement fe && fe.DataContext is ModeItem clicked)
             {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = _selectedMode.ExecutablePath,
-                    Arguments = _selectedMode.Arguments ?? "",
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to launch {_selectedMode.Label}:\n{ex.Message}");
-            }
+                foreach (var m in Modes)
+                    m.IsSelected = false;
 
-            Close();
+                clicked.IsSelected = true;
+
+                OnPropertyChanged(nameof(Modes));
+                OnPropertyChanged(nameof(SelectedMode));
+                OnPropertyChanged(nameof(CountdownText));
+            }
         }
 
-        // -------------------------
-        // SETTINGS WINDOW
-        // -------------------------
         private void OpenSettings()
         {
-            // Remove topmost so the settings window can appear in front
-            this.Topmost = false;
+            CancelCountdown();
 
-            var service = new ConfigService();
-            var cfg = service.Load();
-
-            var vm = new SettingsViewModel(cfg, service);
-
-            var win = new SettingsWindow
+            var win = new SettingsWindow(_config, _configService)
             {
-                DataContext = vm,
                 Owner = this
             };
 
             win.ShowDialog();
-
-            // Restore launcher topmost after settings closes
-            this.Topmost = true;
-
-            // Reload updated config
-            LoadConfig();
-            SetupUI();
         }
 
-        // -------------------------
-        // SIMPLE PROPERTY REFRESH
-        // -------------------------
-        protected void OnPropertyChanged(string name)
+        protected override void OnActivated(EventArgs e)
         {
-            DataContext = null;
-            DataContext = this;
+            base.OnActivated(e);
+
+            if (ReloadIconsRequested)
+            {
+                ReloadIconsRequested = false;
+
+                LoadConfig();
+                LoadModes();
+                SetupCountdown();
+            }
+        }
+
+        public event System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this,
+                new System.ComponentModel.PropertyChangedEventArgs(propertyName));
         }
     }
 }

@@ -9,7 +9,6 @@
         Background="Black"
         Title="ModeLauncher">
 
-    <!-- ROOT GRID THAT CAPTURES ALL INPUT -->
     <Grid Name="Root"
           Background="#101115"
           Focusable="True"
@@ -25,59 +24,23 @@
             </Grid.RowDefinitions>
 
             <!-- HEADER -->
-            <StackPanel Grid.Row="0"
-            Margin="0,20,0,30"
-            HorizontalAlignment="Center"
-            TextBlock.TextAlignment="Center"
-            Opacity="0"
-            RenderTransformOrigin="0.5,0.5">
-
-                <StackPanel.RenderTransform>
-                    <TranslateTransform Y="-15"/>
-                </StackPanel.RenderTransform>
-
-                <StackPanel.Triggers>
-                    <EventTrigger RoutedEvent="Loaded">
-                        <BeginStoryboard>
-                            <Storyboard>
-
-                                <!-- Fade-in -->
-                                <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                     From="0" To="1"
-                                     Duration="0:0:0.55"
-                                     BeginTime="0:0:0.15"
-                                     FillBehavior="HoldEnd"/>
-
-                                <!-- Slide-down -->
-                                <DoubleAnimation Storyboard.TargetProperty="RenderTransform.(TranslateTransform.Y)"
-                                     From="-15" To="0"
-                                     Duration="0:0:0.55"
-                                     BeginTime="0:0:0.15"
-                                     EasingFunction="{StaticResource SmoothEase}"/>
-
-                            </Storyboard>
-                        </BeginStoryboard>
-                    </EventTrigger>
-                </StackPanel.Triggers>
-
+            <StackPanel Grid.Row="0" HorizontalAlignment="Center"
+                        Margin="0,20,0,30"
+                        TextBlock.TextAlignment="Center">
                 <TextBlock Text="Choose Mode"
-               FontSize="34"
-               FontWeight="Bold"
-               Foreground="White"
-               HorizontalAlignment="Center"/>
-
+                           FontSize="34"
+                           FontWeight="Bold"
+                           Foreground="White"
+                           HorizontalAlignment="Center"/>
                 <TextBlock Text="{Binding CountdownText}"
-               FontSize="16"
-               Foreground="#CCCCCC"
-               Margin="0,6,0,0"
-               HorizontalAlignment="Center"/>
+                           FontSize="16"
+                           Foreground="#CCCCCC"
+                           HorizontalAlignment="Center"
+                           Margin="0,6,0,0"/>
             </StackPanel>
 
-
-
-            <!-- MODE TILES -->
-            <ItemsControl Grid.Row="1"
-                          ItemsSource="{Binding Modes}">
+            <!-- MODES -->
+            <ItemsControl Grid.Row="1" ItemsSource="{Binding Modes}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <StackPanel Orientation="Horizontal"
@@ -87,52 +50,47 @@
 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Width="220"
-        Height="180"
-        Margin="10"
-        CornerRadius="18"
-        Background="#1E1F24"
-        BorderBrush="{Binding IsSelected, Converter={StaticResource BoolToHighlightConverter}}"
-        BorderThickness="2">
+                        <Border Width="240"
+                                Height="200"
+                                Margin="10"
+                                CornerRadius="18"
+                                Background="#1E1F24"
+                                BorderBrush="{Binding IsSelected, Converter={StaticResource BoolToHighlightConverter}}"
+                                BorderThickness="2"
+                                MouseLeftButtonDown="ModeTile_MouseLeftButtonDown">
 
                             <StackPanel VerticalAlignment="Center"
-                HorizontalAlignment="Center">
+                                        HorizontalAlignment="Center">
 
                                 <Image Source="{Binding Icon}"
-               Width="48"
-               Height="48"
-               Margin="0,10,0,8"/>
+                                       Width="58" Height="58"
+                                       Margin="0,10,0,8"/>
 
                                 <TextBlock Text="{Binding Label}"
-                   Foreground="White"
-                   FontSize="18"
-                   HorizontalAlignment="Center"/>
+                                           Foreground="White"
+                                           FontSize="20"
+                                           HorizontalAlignment="Center"/>
 
                                 <TextBlock Text="{Binding Subtitle}"
-                   Foreground="#AAAAAA"
-                   FontSize="12"
-                   Margin="0,4,0,0"
-                   HorizontalAlignment="Center"/>
+                                           Foreground="#AAAAAA"
+                                           FontSize="12"
+                                           HorizontalAlignment="Center"
+                                           Margin="0,4,0,0"/>
 
                             </StackPanel>
 
                         </Border>
-
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
 
             <!-- FOOTER -->
-            <StackPanel Grid.Row="2"
-                        Orientation="Horizontal"
-                        HorizontalAlignment="Right"
-                        Margin="0,12,0,0">
-                <TextBlock Text="Ctrl+S: Settings"
+            <StackPanel Grid.Row="2" HorizontalAlignment="Right" Margin="0,15,0,0">
+                <TextBlock Text="Ctrl+S: Settings   |   ESC: Exit"
                            Foreground="#777"
                            FontSize="14"/>
             </StackPanel>
 
         </Grid>
-
     </Grid>
 </Window>

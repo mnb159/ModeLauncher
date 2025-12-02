@@ -1,29 +1,29 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace ModeLauncher.Services
 {
-    public static class IconService
+    public class IconService
     {
         [DllImport("Shell32.dll", CharSet = CharSet.Unicode)]
-        private static extern IntPtr SHGetFileInfo(string pszPath,
+        private static extern IntPtr SHGetFileInfo(
+            string pszPath,
             uint dwFileAttributes,
             ref SHFILEINFO psfi,
             uint cbFileInfo,
             uint uFlags);
-
-        private const uint SHGFI_ICON = 0x000000100;
-        private const uint SHGFI_LARGEICON = 0x000000000;  // Large icon
-        private const uint SHGFI_SMALLICON = 0x000000001;  // Small icon
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
         private struct SHFILEINFO
         {
             public IntPtr hIcon;
             public int iIcon;
+            public uint dwAttributes;
 
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
             public string szDisplayName;
@@ -32,43 +32,49 @@ namespace ModeLauncher.Services
             public string szTypeName;
         }
 
-        public static ImageSource? FromExe(string exePath)
+        private const uint SHGFI_ICON = 0x100;
+        private const uint SHGFI_LARGEICON = 0x0; // large icon
+
+        [DllImport("User32.dll", SetLastError = true)]
+        private static extern bool DestroyIcon(IntPtr hIcon);
+
+        public ImageSource? GetIcon(string? exePath)
         {
             try
             {
+                if (string.IsNullOrWhiteSpace(exePath))
+                    return null;
+
+                exePath = exePath.Trim('"', ' ');
+
                 if (!File.Exists(exePath))
                     return null;
 
-                SHFILEINFO shinfo = new SHFILEINFO();
-
-                IntPtr hImg = SHGetFileInfo(
+                var info = new SHFILEINFO();
+                IntPtr result = SHGetFileInfo(
                     exePath,
                     0,
-                    ref shinfo,
-                    (uint)Marshal.SizeOf(shinfo),
+                    ref info,
+                    (uint)Marshal.SizeOf(info),
                     SHGFI_ICON | SHGFI_LARGEICON);
 
-                if (shinfo.hIcon == IntPtr.Zero)
+                if (result == IntPtr.Zero || info.hIcon == IntPtr.Zero)
                     return null;
 
-                // Convert HICON to WPF ImageSource
-                var img = System.Windows.Interop.Imaging.CreateBitmapSourceFromHIcon(
-                    shinfo.hIcon,
+                var src = Imaging.CreateBitmapSourceFromHIcon(
+                    info.hIcon,
                     Int32Rect.Empty,
-                    BitmapSizeOptions.FromEmptyOptions());
+                    BitmapSizeOptions.FromWidthAndHeight(64, 64));
 
-                // free icon handle
-                DestroyIcon(shinfo.hIcon);
+                src.Freeze();
+                DestroyIcon(info.hIcon);
 
-                return img;
+                return src;
             }
             catch
             {
                 return null;
             }
         }
-
-        [DllImport("User32.dll")]
-        private static extern bool DestroyIcon(IntPtr hIcon);
     }
 }

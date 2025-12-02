@@ -3,6 +3,7 @@ using ModeLauncher.Models;
 using ModeLauncher.Services;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using System.Linq;
 
 namespace ModeLauncher.ViewModels
 {
@@ -54,25 +55,46 @@ namespace ModeLauncher.ViewModels
 
         private void RemoveMode()
         {
-            if (SelectedMode == null) return;
+            if (SelectedMode == null)
+                return;
+
             Modes.Remove(SelectedMode);
-            SelectedMode = Modes.FirstOrDefault();
+
+            // Keep at least one mode
+            if (Modes.Count == 0)
+            {
+                var placeholder = new LaunchMode
+                {
+                    Label = "New Mode",
+                    Subtitle = "",
+                    ExecutablePath = "",
+                    Arguments = ""
+                };
+
+                Modes.Add(placeholder);
+                SelectedMode = placeholder;
+            }
+            else
+            {
+                SelectedMode = Modes.First();
+            }
         }
 
         private void Save()
         {
             Config.Modes = Modes.ToList();
             _configService.Save(Config);
+
+            LauncherWindow.ReloadIconsRequested = true;
         }
 
         private void Close()
         {
-            var window = System.Windows.Application.Current
-                .Windows
+            var win = System.Windows.Application.Current.Windows
                 .OfType<SettingsWindow>()
                 .FirstOrDefault();
 
-            window?.Close();
+            win?.Close();
         }
     }
 }
