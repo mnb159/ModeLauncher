@@ -2,70 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ModeLauncher</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      line-height: 1.6;
-      margin: 0;
-      padding: 2rem;
-      background-color: #0f172a;
-      color: #e5e7eb;
-    }
-    a { color: #60a5fa; }
-    h1, h2, h3 {
-      color: #f9fafb;
-      margin-top: 1.5rem;
-    }
-    code {
-      background: #020617;
-      padding: 0.15rem 0.35rem;
-      border-radius: 4px;
-      font-size: 0.9em;
-    }
-    pre {
-      background: #020617;
-      padding: 1rem;
-      border-radius: 8px;
-      overflow-x: auto;
-      font-size: 0.9em;
-    }
-    pre code {
-      background: transparent;
-      padding: 0;
-    }
-    .tagline {
-      font-size: 0.98rem;
-      color: #9ca3af;
-      margin-bottom: 1.5rem;
-    }
-    ul {
-      padding-left: 1.2rem;
-    }
-    li {
-      margin: 0.2rem 0;
-    }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      max-width: 600px;
-      margin-top: 0.5rem;
-      margin-bottom: 1rem;
-    }
-    th, td {
-      border: 1px solid #1f2933;
-      padding: 0.4rem 0.6rem;
-      text-align: left;
-      font-size: 0.95rem;
-    }
-    th {
-      background-color: #111827;
-    }
-    .mono {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    }
-  </style>
+  
 </head>
 <body>
 
